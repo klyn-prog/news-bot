@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from src.scheduler import schedule_digest
-from src.commands import cmd_start, cmd_stop, cmd_digest, cmd_explain, cmd_status, cmd_help
+from src.commands import cmd_start, cmd_stop, cmd_digest, cmd_explain, cmd_funfacts, cmd_status, cmd_help
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -28,6 +28,7 @@ def main():
     app.add_handler(CommandHandler("stop", cmd_stop))
     app.add_handler(CommandHandler("digest", cmd_digest))
     app.add_handler(CommandHandler("explain", cmd_explain))
+    app.add_handler(CommandHandler("funfacts", cmd_funfacts))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("help", cmd_help))
 

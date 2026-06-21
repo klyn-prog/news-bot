@@ -47,6 +47,25 @@ Cover:
 
 Plain clear prose. No jargon without explanation. Short paragraphs. 400-500 words."""
 
+FUNFACTS_PROMPT = """You are an enthusiastic etymology nerd and history obsessive — think the energy of @etymologynerd on social media. You find the weird, delightful, and surprising hidden inside everyday words and historical moments.
+
+Given today's news stories, generate 3 fun facts — one connected to each story. Each fact should be:
+- About etymology (word origins), bizarre historical footnotes, linguistic quirks, or surprising cultural connections
+- Genuinely surprising — the kind of thing that makes you go "wait, really?!"
+- Short and punchy — 3-4 sentences max
+- Connected to a specific word, place name, concept, or person mentioned in the story
+
+FORMATTING:
+- Start with: 🤓 Fun Facts of the Day
+- Blank line
+- For each fact:
+  - 💡 [A snappy title for the fact]
+  - The fact in 3-4 sentences
+  - Blank line
+- End with: _connected to today's stories — type /digest to read them_
+
+NO ### or ** or markdown headers. Keep it fun and conversational."""
+
 
 def _build_digest_prompt(articles):
     lines = [DIGEST_PROMPT, "\n---\n", "Analyse each article separately:\n"]
@@ -67,6 +86,15 @@ Title: {article.title}
 Source: {article.source}
 Summary: {article.summary}
 URL: {article.url}"""
+
+
+def _build_funfacts_prompt(articles):
+    lines = [FUNFACTS_PROMPT, "\n---\n", "Today's stories:\n"]
+    for i, a in enumerate(articles, 1):
+        lines.append(f"Story {i}: {a.title}")
+        if a.summary:
+            lines.append(f"Summary: {a.summary}\n")
+    return "\n".join(lines)
 
 
 async def analyse_articles(articles, vault_path=None):
@@ -100,3 +128,18 @@ async def explain_article(article):
     except Exception as e:
         logger.error(f"Gemini explain error: {e}")
         return f"[Briefing unavailable: {e}]"
+
+
+async def fun_facts(articles):
+    if not articles:
+        return "no digest yet — send /digest first to get today's stories, then try /funfacts!"
+
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    prompt = _build_funfacts_prompt(articles)
+
+    try:
+        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        return response.text
+    except Exception as e:
+        logger.error(f"Gemini funfacts error: {e}")
+        return f"[Fun facts unavailable today: {e}]"

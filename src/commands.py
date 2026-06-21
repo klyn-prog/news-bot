@@ -5,7 +5,7 @@ from pathlib import Path
 from telegram import Update
 from telegram.ext import ContextTypes
 from src.news_fetcher import fetch_articles
-from src.analyser import analyse_articles, explain_article
+from src.analyser import analyse_articles, explain_article, fun_facts
 from src.subscribers import add_subscriber, remove_subscriber, load_subscribers
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     add_subscriber(chat_id)
     first_name = update.effective_user.first_name or "there"
     await update.message.reply_text(
-        f"hi {first_name}! good morning! ☀️ welcome to klyn's news bot! this bot will send you three stories on geopolitics, sg and sea, and an analysis on them, every morning at 7:30 SGT! hopefully this is a successful get-smarter-quick scheme!\n\ntype /explain 1, /explain 2, or /explain 3 after a digest to get a deeper background briefing on any story."
+        f"hi {first_name}! good morning! ☀️ welcome to klyn's news bot! this bot will send you three stories on geopolitics, sg and sea, and an analysis on them, every morning at 7:30 SGT! hopefully this is a successful get-smarter-quick scheme!\n\n"
+        f"commands:\n"
+        f"/digest — get today's digest\n"
+        f"/explain 1, 2 or 3 — deep background on a story\n"
+        f"/funfacts — etymology and history fun facts from today's news\n"
+        f"/stop — unsubscribe"
     )
 
 
@@ -91,6 +96,14 @@ async def cmd_explain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📖 pulling together the background briefing — give me a moment...")
     briefing = await explain_article(articles[index])
     await _send_long_message(context.bot, chat_id, briefing)
+
+
+async def cmd_funfacts(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    articles = _load_last_articles()
+    await update.message.reply_text("🤓 digging up the weird and wonderful — give me a second...")
+    result = await fun_facts(articles)
+    await _send_long_message(context.bot, chat_id, result)
 
 
 async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
