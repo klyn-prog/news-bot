@@ -1,7 +1,6 @@
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 from datetime import datetime, timezone, timedelta
 from google import genai
 from src.news_fetcher import Article
@@ -34,18 +33,34 @@ FORMATTING — follow exactly:
 - 📖 Type /explain [article number] for a deeper background briefing on this story
 - Separate articles with: ———
 
-NO ### or ** or markdown headers. NO bullet points. Short paragraphs only."""
+NO ### or ** or markdown headers. NO bullet points. NO numbered lists. Short paragraphs only."""
 
-EXPLAIN_PROMPT = """You are a news analyst and educator. Write a thorough but accessible background briefing.
+EXPLAIN_PROMPT = """You are a news analyst and educator. Write a thorough but accessible background briefing for a Telegram message.
 
-Cover:
-1. 🌍 Background and History: How did this situation develop? Key historical moments.
-2. 👥 Key Players: Main actors, their interests and motivations.
-3. ⚙️ How it works: Explain any systems or institutions the reader needs to understand.
-4. 🇸🇬 Why Singapore should care: Trade, diplomacy, economics, historical ties.
-5. 📚 Key concepts: 2-3 academic concepts from PPE that help make sense of this. Explain each in 2-3 sentences as if the reader has never encountered them.
+STRICT FORMATTING RULES:
+- NO bullet points
+- NO numbered lists
+- NO ** bold ** or markdown
+- Short paragraphs only (2-3 sentences)
+- Use these exact emoji headers for each section, each on its own line
 
-Plain clear prose. No jargon without explanation. Short paragraphs. 400-500 words."""
+Structure:
+🌍 Background & History
+[2-3 short paragraphs on how this situation developed and key historical moments]
+
+👥 Key Players
+[2-3 short paragraphs naming the main actors, their interests and motivations]
+
+⚙️ How It Works
+[2-3 short paragraphs explaining any systems or institutions the reader needs to understand]
+
+🇸🇬 Why Singapore Should Care
+[2-3 short paragraphs connecting to Singapore — trade, diplomacy, economics, historical ties]
+
+📚 Key Concepts
+[3 concepts from politics, philosophy or economics that help make sense of this story. For each: write the concept name followed by a colon, then 2-3 sentences explaining it plainly as if the reader has never heard of it. Separate each concept with a blank line.]
+
+Total: 400-500 words. Plain conversational prose. No jargon without explanation."""
 
 FUNFACTS_PROMPT = """You are an enthusiastic etymology nerd and history obsessive — think the energy of @etymologynerd on social media. You find the weird, delightful, and surprising hidden inside everyday words and historical moments.
 
@@ -62,9 +77,9 @@ FORMATTING:
   - 💡 [A snappy title for the fact]
   - The fact in 3-4 sentences
   - Blank line
-- End with: _connected to today's stories — type /digest to read them_
+- End with: type /digest to read today's stories
 
-NO ### or ** or markdown headers. Keep it fun and conversational."""
+NO ### or ** or markdown. NO bullet points. Keep it fun and conversational."""
 
 
 def _build_digest_prompt(articles):
