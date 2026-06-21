@@ -46,9 +46,11 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     first_name = update.effective_user.first_name or "there"
     await update.message.reply_text(
         f"hi {first_name}! good morning! ☀️ welcome to klyn's news bot! this bot will send you three stories on geopolitics, sg and sea, and an analysis on them, every morning at 7:30 SGT! hopefully this is a successful get-smarter-quick scheme!\n\n"
-        f"commands:\n"
+        f"here's what you can do:\n\n"
         f"/digest — get today's digest\n"
-        f"/explain 1, 2 or 3 — deep background on a story\n"
+        f"/explain 1 — background briefing on story 1\n"
+        f"/explain 2 — background briefing on story 2\n"
+        f"/explain 3 — background briefing on story 3\n"
         f"/funfacts — etymology and history fun facts from today's news\n"
         f"/stop — unsubscribe"
     )
