@@ -5,7 +5,7 @@ from pathlib import Path
 from telegram import Update
 from telegram.ext import ContextTypes
 from src.news_fetcher import fetch_articles
-from src.analyser import analyse_articles, explain_article, fun_facts
+from src.analyser import analyse_articles, explain_article, fun_facts, vocabulary, debate, connections, timeline, thisweek
 from src.subscribers import add_subscriber, remove_subscriber, load_subscribers
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,11 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"/explain 2 — background briefing on story 2\n"
         f"/explain 3 — background briefing on story 3\n"
         f"/funfacts — etymology and history fun facts from today's news\n"
+        f"/vocabulary — key PPE terms from today's stories\n"
+        f"/debate — for and against on today's top story\n"
+        f"/connections — hidden links between today's 3 stories\n"
+        f"/timeline [topic] — e.g. /timeline south china sea\n"
+        f"/thisweek [year] — e.g. /thisweek 1989\n"
         f"/stop — unsubscribe"
     )
 
@@ -83,18 +88,14 @@ async def cmd_digest(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_explain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     args = context.args
-
     if not args or args[0] not in ["1", "2", "3"]:
-        await update.message.reply_text("please type /explain 1, /explain 2, or /explain 3 to get a background briefing on one of today's stories.")
+        await update.message.reply_text("please type /explain 1, /explain 2, or /explain 3.")
         return
-
     index = int(args[0]) - 1
     articles = _load_last_articles()
-
     if not articles or index >= len(articles):
-        await update.message.reply_text("no digest found yet — send /digest first to get today's stories.")
+        await update.message.reply_text("no digest found yet — send /digest first.")
         return
-
     await update.message.reply_text("📖 pulling together the background briefing — give me a moment...")
     briefing = await explain_article(articles[index])
     await _send_long_message(context.bot, chat_id, briefing)
@@ -105,6 +106,55 @@ async def cmd_funfacts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     articles = _load_last_articles()
     await update.message.reply_text("🤓 digging up the weird and wonderful — give me a second...")
     result = await fun_facts(articles)
+    await _send_long_message(context.bot, chat_id, result)
+
+
+async def cmd_vocabulary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    articles = _load_last_articles()
+    await update.message.reply_text("📖 finding today's key terms — give me a second...")
+    result = await vocabulary(articles)
+    await _send_long_message(context.bot, chat_id, result)
+
+
+async def cmd_debate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    articles = _load_last_articles()
+    await update.message.reply_text("⚖️ building the debate brief — give me a second...")
+    result = await debate(articles)
+    await _send_long_message(context.bot, chat_id, result)
+
+
+async def cmd_connections(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    articles = _load_last_articles()
+    await update.message.reply_text("🕸️ finding the hidden thread — give me a second...")
+    result = await connections(articles)
+    await _send_long_message(context.bot, chat_id, result)
+
+
+async def cmd_timeline(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    if not context.args:
+        await update.message.reply_text("please provide a topic — e.g. /timeline south china sea")
+        return
+    topic = " ".join(context.args)
+    await update.message.reply_text(f"📅 building the timeline for '{topic}' — this may take ~30 seconds...")
+    result = await timeline(topic)
+    await _send_long_message(context.bot, chat_id, result)
+
+
+async def cmd_thisweek(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    if not context.args:
+        await update.message.reply_text("please provide a year — e.g. /thisweek 1989")
+        return
+    year = context.args[0]
+    if not year.isdigit():
+        await update.message.reply_text("please provide a valid year — e.g. /thisweek 1989")
+        return
+    await update.message.reply_text(f"🗓 digging up history from {year} — give me a moment...")
+    result = await thisweek(year)
     await _send_long_message(context.bot, chat_id, result)
 
 
