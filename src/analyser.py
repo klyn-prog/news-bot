@@ -231,7 +231,7 @@ async def analyse_articles(articles, vault_path=None):
     prompt = _build_digest_prompt(articles[:3])
 
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
         analysis = response.text
     except Exception as e:
         logger.error(f"Gemini API error: {e}")
@@ -247,7 +247,7 @@ async def analyse_articles(articles, vault_path=None):
 async def explain_article(article):
     client = _get_client()
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=_build_explain_prompt(article))
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=_build_explain_prompt(article))
         return f"📖 Background Briefing: {article.title}\n\n{response.text}\n\n🔗 {article.url}"
     except Exception as e:
         logger.error(f"Gemini explain error: {e}")
@@ -259,7 +259,7 @@ async def fun_facts(articles):
         return "no digest yet — send /digest first!"
     client = _get_client()
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=_build_funfacts_prompt(articles))
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=_build_funfacts_prompt(articles))
         return response.text
     except Exception as e:
         return f"[Fun facts unavailable: {e}]"
@@ -270,7 +270,7 @@ async def vocabulary(articles):
         return "no digest yet — send /digest first!"
     client = _get_client()
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=_build_vocabulary_prompt(articles))
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=_build_vocabulary_prompt(articles))
         return response.text
     except Exception as e:
         return f"[Vocabulary unavailable: {e}]"
@@ -281,7 +281,7 @@ async def debate(articles):
         return "no digest yet — send /digest first!"
     client = _get_client()
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=_build_debate_prompt(articles[0]))
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=_build_debate_prompt(articles[0]))
         return response.text
     except Exception as e:
         return f"[Debate unavailable: {e}]"
@@ -292,7 +292,7 @@ async def connections(articles):
         return "no digest yet — send /digest first!"
     client = _get_client()
     try:
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=_build_connections_prompt(articles))
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=_build_connections_prompt(articles))
         return response.text
     except Exception as e:
         return f"[Connections unavailable: {e}]"
@@ -303,7 +303,7 @@ async def timeline(topic: str):
     prompt = TIMELINE_PROMPT + f"\n\nTopic to cover: {topic}"
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt,
             config={"tools": [{"google_search": {}}]}
         )
@@ -311,7 +311,7 @@ async def timeline(topic: str):
     except Exception as e:
         # fallback without search
         try:
-            response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
             return response.text
         except Exception as e2:
             return f"[Timeline unavailable: {e2}]"
@@ -325,14 +325,14 @@ async def thisweek(year: str):
     prompt = THISWEEK_PROMPT + f"\n\nYear requested: {year}\nCurrent week: {week_str}"
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt,
             config={"tools": [{"google_search": {}}]}
         )
         return response.text
     except Exception as e:
         try:
-            response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
             return response.text
         except Exception as e2:
             return f"[This week unavailable: {e2}]"
