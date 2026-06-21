@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Morning Digest Telegram Bot — multi-user version
-Anyone who /start's the bot gets added to the daily digest.
-"""
-
 import asyncio
 import logging
 import os
@@ -13,7 +7,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from src.scheduler import schedule_digest
-from src.commands import cmd_start, cmd_stop, cmd_digest, cmd_status, cmd_help
+from src.commands import cmd_start, cmd_stop, cmd_digest, cmd_explain, cmd_status, cmd_help
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -28,17 +22,15 @@ logger = logging.getLogger(__name__)
 
 def main():
     token = os.environ["TELEGRAM_BOT_TOKEN"]
-
     app = Application.builder().token(token).build()
 
-    # Commands
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("stop", cmd_stop))
     app.add_handler(CommandHandler("digest", cmd_digest))
+    app.add_handler(CommandHandler("explain", cmd_explain))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("help", cmd_help))
 
-    # Daily digest at 7:30 AM Singapore time (UTC 23:30 prev day)
     app.job_queue.run_daily(
         schedule_digest,
         time=time(23, 30),
